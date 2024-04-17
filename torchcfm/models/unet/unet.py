@@ -385,6 +385,7 @@ class UNetModel(nn.Module):
                                of heads for upsampling. Deprecated.
     :param use_scale_shift_norm: use a FiLM-like conditioning mechanism.
     :param resblock_updown: use residual blocks for up/downsampling.
+    :param updown: use a UNet with up/downsampling. If False, no upsampling/downsampling is used.
     :param use_new_attention_order: use a different attention pattern for potentially
                                     increased efficiency.
     """
@@ -409,6 +410,7 @@ class UNetModel(nn.Module):
         num_heads_upsample=-1,
         use_scale_shift_norm=False,
         resblock_updown=False,
+        updown=False,
         use_new_attention_order=False,
     ):
         super().__init__()
@@ -460,6 +462,7 @@ class UNetModel(nn.Module):
                         dims=dims,
                         use_checkpoint=use_checkpoint,
                         use_scale_shift_norm=use_scale_shift_norm,
+                        down=updown,
                     )
                 ]
                 ch = int(mult * model_channels)
@@ -488,9 +491,9 @@ class UNetModel(nn.Module):
                             dims=dims,
                             use_checkpoint=use_checkpoint,
                             use_scale_shift_norm=use_scale_shift_norm,
-                            down=True,
+                            down=updown,
                         )
-                        if resblock_updown
+                        if resblock_updown and updown
                         else Downsample(ch, conv_resample, dims=dims, out_channels=out_ch)
                     )
                 )
@@ -563,9 +566,9 @@ class UNetModel(nn.Module):
                             dims=dims,
                             use_checkpoint=use_checkpoint,
                             use_scale_shift_norm=use_scale_shift_norm,
-                            up=True,
+                            up=updown,
                         )
-                        if resblock_updown
+                        if resblock_updown and updown
                         else Upsample(ch, conv_resample, dims=dims, out_channels=out_ch)
                     )
                     ds //= 2
@@ -869,6 +872,7 @@ class UNetModelWrapper(UNetModel):
         use_scale_shift_norm=False,
         dropout=0,
         resblock_updown=False,
+        updown=False,
         use_fp16=False,
         use_new_attention_order=False,
     ):
@@ -915,6 +919,7 @@ class UNetModelWrapper(UNetModel):
             resblock_updown=resblock_updown,
             use_new_attention_order=use_new_attention_order,
             dims=dims,
+            updown=updown,
         )
 
     def forward(self, t, x, y=None, *args, **kwargs):
