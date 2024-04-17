@@ -493,7 +493,7 @@ class UNetModel(nn.Module):
                             use_scale_shift_norm=use_scale_shift_norm,
                             down=updown,
                         )
-                        if resblock_updown and updown
+                        if resblock_updown
                         else Downsample(ch, conv_resample, dims=dims, out_channels=out_ch)
                     )
                 )
@@ -568,7 +568,7 @@ class UNetModel(nn.Module):
                             use_scale_shift_norm=use_scale_shift_norm,
                             up=updown,
                         )
-                        if resblock_updown and updown
+                        if resblock_updown
                         else Upsample(ch, conv_resample, dims=dims, out_channels=out_ch)
                     )
                     ds //= 2
